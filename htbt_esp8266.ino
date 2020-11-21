@@ -1,14 +1,14 @@
 #include <SoftwareSerial.h>
 #define DEBUG true
-SoftwareSerial esp8266(9,10);
+SoftwareSerial esp8266(9,10); //Rx, Tx
 #include <LiquidCrystal.h>
 #include <stdlib.h>
-LiquidCrystal lcd(12,11,5,4,3,2);
+LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
  
-#define SSID "Alexahome" // "SSID-WiFiname"
-#define PASS "98765432" // "password"
+#define SSID "Austin" // "SSID-WiFiname"
+#define PASS "heybrother" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
-String msg = "GET /update?key=W86OQNB83XEQIMN4"; //change it with your api key
+String msg = "GET /update?key=MD868VXVCJSZEJ1Y"; //change it with your api key
  
 //Variables
 float temp;
@@ -44,7 +44,7 @@ void setup()
 lcd.begin(16, 2);
 lcd.print("Connecting...");
 Serial.begin(9600);
-esp8266.begin(9600);
+esp8266.begin(115200);
 Serial.println("AT");
 esp8266.println("AT");
 delay(5000);
@@ -131,7 +131,8 @@ sei(); // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED
  
 ISR(TIMER2_COMPA_vect){ // triggered when Timer2 counts to 124
 cli(); // disable interrupts while we do this
-Signal = analogRead(pulsePin); // read the Pulse Sensor
+//Signal = analogRead(pulsePin); // read the Pulse Sensor
+Signal =  90.1; // read the Pulse Sensor
 sampleCounter += 2; // keep track of the time in mS
 int N = sampleCounter - lastBeatTime; // monitor the time since the last beat to avoid noise
  
