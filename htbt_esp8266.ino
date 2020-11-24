@@ -6,7 +6,7 @@ SoftwareSerial esp8266(9,10); //Rx, Tx
 LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
  
 #define SSID "Austin" // "SSID-WiFiname"
-#define PASS "heybrother" // "password"
+#define PASS "nopasscode" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=MD868VXVCJSZEJ1Y"; //change it with your api key
  
@@ -15,9 +15,9 @@ float temp;
 int hum;
 String tempC;
 int error;
-int pulsePin = 0; // Pulse Sensor connected to analog pin
-int blinkPin = 7; // pin to blink led at each beat
-int fadePin = 5;
+int pulsePin = A0; // Pulse Sensor connected to analog pin
+int blinkPin = 12; // pin to blink led at each beat
+int fadePin = 13;
 int fadeRate = 0;
  
 // Volatile Variables, used in the interrupt service routine!
@@ -132,7 +132,7 @@ sei(); // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED
 ISR(TIMER2_COMPA_vect){ // triggered when Timer2 counts to 124
 cli(); // disable interrupts while we do this
 //Signal = analogRead(pulsePin); // read the Pulse Sensor
-Signal =  90.1; // read the Pulse Sensor
+Signal =  digitalRead(A0);; // read the Pulse Sensor
 sampleCounter += 2; // keep track of the time in mS
 int N = sampleCounter - lastBeatTime; // monitor the time since the last beat to avoid noise
  
