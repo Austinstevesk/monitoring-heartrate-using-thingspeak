@@ -15,10 +15,9 @@ float temp;
 int hum;
 String tempC;
 int error;
-int pulsePin = A0; // Pulse Sensor connected to analog pin
-int blinkPin = 12; // pin to blink led at each beat
-int fadePin = 13;
-int fadeRate = 0;
+int pulsePin = 0; // Pulse Sensor connected to analog pin
+int buzzer = 11; // pin to send sound to buzzer
+bool alert = false;
  
 // Volatile Variables, used in the interrupt service routine!
 volatile int BPM; // int that holds raw Analog in 0. updated every 2mS
@@ -38,12 +37,14 @@ volatile int thresh = 525; // used to find instant moment of heart beat
 volatile int amp = 100; // used to hold amplitude of pulse waveform
 volatile boolean firstBeat = true; // used to seed rate array
 volatile boolean secondBeat = false; // used to seed rate array
+
  
 void setup()
 {
 lcd.begin(16, 2);
 lcd.print("Connecting...");
 Serial.begin(9600);
+pinMode(buzzer, OUTPUT);
 esp8266.begin(115200);
 Serial.println("AT");
 esp8266.println("AT");
@@ -53,6 +54,7 @@ connectWiFi();
 }
 interruptSetup();
 }
+
  
 void loop(){
 lcd.clear();
@@ -61,14 +63,30 @@ error=0;
 lcd.setCursor(0, 0);
 lcd.print("BPM = ");
 lcd.print(BPM);
+Serial.println(BPM);
 delay (100);
 lcd.setCursor(0, 1); // set the cursor to column 0, line 2
+
 delay(1000);
+if(alert == false){
+   if(BPM>70){
+      digitalWrite(buzzer, HIGH);
+      alert = true;
+}
+}
+if(alert){
+  if(BPM<70){
+  digitalWrite(buzzer, LOW);
+  alert = false;
+  }
+}
+
 updatebeat();
 if (error==1){
 goto start; //go to label "start"
 }
- 
+
+
 delay(1000);
 }
  
@@ -131,8 +149,8 @@ sei(); // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED
  
 ISR(TIMER2_COMPA_vect){ // triggered when Timer2 counts to 124
 cli(); // disable interrupts while we do this
-//Signal = analogRead(pulsePin); // read the Pulse Sensor
-Signal =  digitalRead(A0);; // read the Pulse Sensor
+Signal = analogRead(pulsePin); // read the Pulse Sensor
+//Signal =  digitalRead(A0); // read the Pulse Sensor
 sampleCounter += 2; // keep track of the time in mS
 int N = sampleCounter - lastBeatTime; // monitor the time since the last beat to avoid noise
  
@@ -150,7 +168,6 @@ P = Signal; // P is the peak
 if (N > 250){ // avoid high frequency noise
 if ( (Signal > thresh) && (Pulse == false) && (N > (IBI/5)*3) ){
 Pulse = true; // set the Pulse flag when there is a pulse
-digitalWrite(blinkPin,HIGH); // turn on pin 13 LED
 IBI = sampleCounter - lastBeatTime; // time between beats in mS
 lastBeatTime = sampleCounter; // keep track of time for next pulse
  
@@ -183,7 +200,6 @@ QS = true; // set Quantified Self flag
 }
  
 if (Signal < thresh && Pulse == true){ // when the values are going down, the beat is over
-digitalWrite(blinkPin,LOW); // turn off pin 13 LED
 Pulse = false; // reset the Pulse flag so we can do it again
 amp = P - T; // get amplitude of the pulse wave
 thresh = amp/2 + T; // set thresh at 50% of the amplitude
