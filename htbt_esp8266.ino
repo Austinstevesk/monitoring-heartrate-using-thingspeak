@@ -6,7 +6,7 @@ SoftwareSerial esp8266(9,10); //Rx, Tx
 LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
  
 #define SSID "Austin" // "SSID-WiFiname"
-#define PASS "nopasscode" // "password"
+#define PASS "fuckoffps" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=MD868VXVCJSZEJ1Y"; //change it with your api key
  
@@ -15,8 +15,10 @@ float temp;
 int hum;
 String tempC;
 int error;
-int pulsePin = 0; // Pulse Sensor connected to analog pin
+int pulsePin = A0; // Pulse Sensor connected to analog pin
 int buzzer = 11; // pin to send sound to buzzer
+int fadePin = 5;
+int faderate = 0;
 bool alert = false;
  
 // Volatile Variables, used in the interrupt service routine!
@@ -40,7 +42,9 @@ volatile boolean secondBeat = false; // used to seed rate array
 
  
 void setup()
-{
+{      
+pinMode(fadePin,OUTPUT);                     
+interruptSetup();
 lcd.begin(16, 2);
 lcd.print("Connecting...");
 Serial.begin(9600);
@@ -57,26 +61,39 @@ interruptSetup();
 
  
 void loop(){
+  if(QS){
 lcd.clear();
 start:
 error=0;
 lcd.setCursor(0, 0);
 lcd.print("BPM = ");
 lcd.print(BPM);
+lcd.setCursor(0, 1);
+lcd.print("Normal BPM");
+Serial.print("BPM = ");
 Serial.println(BPM);
-delay (100);
-lcd.setCursor(0, 1); // set the cursor to column 0, line 2
-
 delay(1000);
+
 if(alert == false){
    if(BPM>70){
       digitalWrite(buzzer, HIGH);
+      lcd.clear();
+      lcd.print("BPM = ");
+      lcd.print(BPM);
+      lcd.setCursor(0,1);
+      lcd.print("BPM Too High");
       alert = true;
 }
 }
 if(alert){
   if(BPM<70){
   digitalWrite(buzzer, LOW);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("BPM = ");
+  lcd.print(BPM);
+  lcd.setCursor(0,1);
+  lcd.print("Normal BPM");
   alert = false;
   }
 }
@@ -85,9 +102,20 @@ updatebeat();
 if (error==1){
 goto start; //go to label "start"
 }
+QS = false;
+  }
+  else{
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("No heartbeat:");
+    lcd.setCursor(0,1);
+    lcd.print("Finger removed");
+    Serial.println("Sensor disconnected ");
+   
 
+  }
 
-delay(1000);
+delay(100);
 }
  
 void updatebeat(){
@@ -150,7 +178,6 @@ sei(); // MAKE SURE GLOBAL INTERRUPTS ARE ENABLED
 ISR(TIMER2_COMPA_vect){ // triggered when Timer2 counts to 124
 cli(); // disable interrupts while we do this
 Signal = analogRead(pulsePin); // read the Pulse Sensor
-//Signal =  digitalRead(A0); // read the Pulse Sensor
 sampleCounter += 2; // keep track of the time in mS
 int N = sampleCounter - lastBeatTime; // monitor the time since the last beat to avoid noise
  
@@ -168,9 +195,9 @@ P = Signal; // P is the peak
 if (N > 250){ // avoid high frequency noise
 if ( (Signal > thresh) && (Pulse == false) && (N > (IBI/5)*3) ){
 Pulse = true; // set the Pulse flag when there is a pulse
+
 IBI = sampleCounter - lastBeatTime; // time between beats in mS
-lastBeatTime = sampleCounter; // keep track of time for next pulse
- 
+lastBeatTime = sampleCounter; // keep track of time for next pulse 
 if(secondBeat){ // if this is the second beat
 secondBeat = false; // clear secondBeat flag
 for(int i=0; i<=9; i++){ // seed the running total to get a realistic BPM at startup
