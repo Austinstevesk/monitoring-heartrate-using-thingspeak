@@ -8,7 +8,7 @@ LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
 #define SSID "Mi-A3" // "SSID-WiFiname"
 #define PASS "nopasscode" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
-String msg = "GET /update?key=MD868VXVCJSZEJ1Y"; //change it with your api key
+String msg = "GET /update?key=EWM1RDNWEK8RLINJ"; //change it with your api key
  
 //Variables
 float temp;
