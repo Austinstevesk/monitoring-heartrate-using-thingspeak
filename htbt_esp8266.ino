@@ -5,8 +5,8 @@ SoftwareSerial esp8266(9,10); //Rx, Tx
 #include <stdlib.h>
 LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
  
-#define SSID "Austin" // "SSID-WiFiname"
-#define PASS "fuckoffps" // "password"
+#define SSID "Mi-A3" // "SSID-WiFiname"
+#define PASS "nopasscode" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=MD868VXVCJSZEJ1Y"; //change it with your api key
  
@@ -15,8 +15,8 @@ float temp;
 int hum;
 String tempC;
 int error;
-int pulsePin = A0; // Pulse Sensor connected to analog pin
-int buzzer = 11; // pin to send sound to buzzer
+int pulsePin = A1; // Pulse Sensor connected to analog pin
+int buzzer = 13; // pin to send sound to buzzer
 int fadePin = 5;
 int faderate = 0;
 bool alert = false;
@@ -75,7 +75,7 @@ Serial.println(BPM);
 delay(1000);
 
 if(alert == false){
-   if(BPM>70){
+   if(BPM>100){
       digitalWrite(buzzer, HIGH);
       lcd.clear();
       lcd.print("BPM = ");
@@ -84,9 +84,20 @@ if(alert == false){
       lcd.print("BPM Too High");
       alert = true;
 }
+if(BPM<35){
+  digitalWrite(buzzer, HIGH);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("BPM = ");
+  lcd.print(BPM);
+  lcd.setCursor(0,1);
+  lcd.print("BPM too Low");
+  alert = true;
+  
+}
 }
 if(alert){
-  if(BPM<70){
+  if(BPM<100 && BPM >35){
   digitalWrite(buzzer, LOW);
   lcd.clear();
   lcd.setCursor(0,0);
@@ -105,6 +116,7 @@ goto start; //go to label "start"
 QS = false;
   }
   else{
+    digitalWrite(buzzer, LOW);
     lcd.clear();
     lcd.setCursor(0,0);
     lcd.print("No heartbeat:");
