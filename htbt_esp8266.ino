@@ -1,6 +1,7 @@
 #include <SoftwareSerial.h>
 #define DEBUG true
-SoftwareSerial esp8266(9,10); //Rx, Tx
+SoftwareSerial esp8266(9,10); //Rx, Tx -> For the Wi-Fi module
+SoftwareSerial sim(11, 12); //Rx, Tx -> For GSM module
 #include <LiquidCrystal.h>
 #include <stdlib.h>
 LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
@@ -9,6 +10,7 @@ LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
 #define PASS "nopasscode" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=EWM1RDNWEK8RLINJ"; //change it with your api key
+String number = "+2547......";
  
 //Variables
 float temp;
@@ -82,6 +84,7 @@ if(alert == false){
       lcd.print(BPM);
       lcd.setCursor(0,1);
       lcd.print("BPM Too High");
+      bpmTooHigh();
       alert = true;
 }
 if(BPM<35){
@@ -92,6 +95,7 @@ if(BPM<35){
   lcd.print(BPM);
   lcd.setCursor(0,1);
   lcd.print("BPM too Low");
+  bpmTooLow();
   alert = true;
   
 }
@@ -256,3 +260,42 @@ secondBeat = false; // when we get the heartbeat back
 }
 sei();
 }
+   void bpmTooHigh()
+    {
+      Serial.println ("Sending Message........\n");
+      sim.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+      delay(1000);
+      //Serial.println ("Set SMS Number"); nb
+      sim.println("AT+CMGS=\"" + number + "\"\r"); //Mobile phone number to send message
+      delay(1000);
+      //char value[5];
+      //itoa(h,value,10); //convert integer to char array      
+      String SMS = "Warning! BPM too high!";
+      sim.println(SMS);
+      Serial.println(SMS);
+      delay(100);
+      sim.println((char)26);// ASCII code of CTRL+Z
+      delay(1000);
+      //_buffer = _readSerial();
+    }
+
+
+   
+    void bpmTooLow()
+    {
+      Serial.println ("Sending Message..........\n");
+      sim.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+      delay(1000);
+      //Serial.println ("Set SMS Number");
+      sim.println("AT+CMGS=\"" + number + "\"\r"); //Mobile phone number to send message
+      delay(1000);
+      //char value[5];
+      //itoa(h,value,10); //convert integer to char array      
+      String SMS = "Warning! BPM too low!";
+      sim.println(SMS);
+      Serial.println(SMS);
+      delay(100);
+      sim.println((char)26);// ASCII code of CTRL+Z
+      delay(1000);
+      //_buffer = _readSerial();
+    }
