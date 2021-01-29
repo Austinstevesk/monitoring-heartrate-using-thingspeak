@@ -6,8 +6,8 @@ SoftwareSerial sim(11, 12); //Rx, Tx -> For GSM module
 #include <stdlib.h>
 LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
  
-#define SSID "Mi-A3" // "SSID-WiFiname"
-#define PASS "nopasscode" // "password"
+#define SSID "Austin" // "SSID-WiFiname"
+#define PASS "mainconfig" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=EWM1RDNWEK8RLINJ"; //change it with your api key
 String number = "+2547......";
@@ -126,7 +126,7 @@ QS = false;
     lcd.print("No heartbeat:");
     lcd.setCursor(0,1);
     lcd.print("Finger removed");
-    Serial.println("Sensor disconnected ");
+    //Serial.println("Sensor disconnected ");
    
 
   }
