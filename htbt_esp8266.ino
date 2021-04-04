@@ -10,7 +10,7 @@ LiquidCrystal lcd(2,3,4,5,6,7); //RS, E, D4, D5, D6, D7
 #define PASS "mainconfig" // "password"
 #define IP "184.106.153.149"// thingspeak.com ip
 String msg = "GET /update?key=EWM1RDNWEK8RLINJ"; //change it with your api key
-String number = "+2547......";
+String number = "+2547**......";
  
 //Variables
 float temp;
